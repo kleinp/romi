@@ -1,3 +1,9 @@
+# Gazebo model
+Mostly followed the following tutorials to create the model
+
+http://gazebosim.org/tutorials?cat=guided_i&tut=guided_i5
+http://gazebosim.org/tutorials?tut=plugins_hello_world&cat=write_plugin
+
 ## Building the plugin
 
 Run the following.

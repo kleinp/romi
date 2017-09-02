@@ -30,3 +30,20 @@ source /home/kleinp/romi/catkin_ws/devel/setup.bash
 ```
 
 After adding this, whenever you open a terminal it will be set up and read to go with both Gazebo and ROS!
+
+## Visual Studio Code customization
+Add extra folders to path so 'intellisense' stops underlining includes. On one of the underlined includes, click the little light bulb icon. This should open _c_cpp_properties.json_. Find the _path_ section for your operating system. It should look like the below (after adding the last 3 lines)
+
+```
+"includePath": [
+    "/usr/include/x86_64-linux-gnu/c++/5",
+    "/usr/include/c++/5",
+    "/usr/local/include",
+    "/usr/include/x86_64-linux-gnu",
+    "/usr/include",
+    "${workspaceRoot}",
+    "/opt/ros/kinetic/include/",
+    "/usr/include/gazebo-8/",
+    "/usr/include/linux"
+],
+```

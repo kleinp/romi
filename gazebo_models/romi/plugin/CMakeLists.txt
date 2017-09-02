@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-MESSAGE( STATUS "1" ${GAZEBO_INCLUDE_DIRS})
+# Find ROS
+find_package(roscpp REQUIRED)
+find_package(std_msgs REQUIRED)
+include_directories(${roscpp_INCLUDE_DIRS})
+include_directories(${std_msgs_INCLUDE_DIRS})
 
 # Find Gazebo
 find_package(gazebo REQUIRED)
@@ -10,7 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 # Build our plugin
 add_library(romi_plugin SHARED romi_plugin.cc)
-target_link_libraries(romi_plugin ${GAZEBO_libraries})
+target_link_libraries(romi_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
 
 # Build the stand-alone test program
 add_executable(vel vel.cc)

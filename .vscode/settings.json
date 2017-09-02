@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.world": "xml",
+        "*.sdf": "xml",
+        "*.config": "xml",
+        "string": "cpp",
+        "cstddef": "cpp",
+        "iostream": "cpp"
+    }
+}
