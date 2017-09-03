@@ -20,6 +20,11 @@ ROS project for Pololu Romi robot, with Gazebo simulation capability. A work in 
 1. Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation)
 1. Install [Gazebo 8.1.1](http://gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
 1. I'm using Visual Studio Code editor
+1. apt installs
+
+```
+ros-kinetic-gazebo8-plugins 
+```
 
 ## Setting up terminal
 In your ~/.bashrc file, add the following. Note the first line may already be present after installing ROS. Adjust the second line as necessary for the path to your workspace folder.

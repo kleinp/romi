@@ -126,6 +126,10 @@
                         <resolution>0.005</resolution>
                     </range>
                 </ray>
+                <plugin name="dist_0" filename="libgazebo_ros_gpu_laser.so">
+                    <topicName>/romi/dist/fwd</topicName>
+                    <frameName>romi_frame</frameName>
+                </plugin>
             </sensor>
 
             <sensor type="gpu_ray" name="dist_sensor_n45">
@@ -147,6 +151,10 @@
                         <resolution>0.005</resolution>
                     </range>
                 </ray>
+                <plugin name="dist_n45" filename="libgazebo_ros_gpu_laser.so">
+                    <topicName>/romi/dist/n45</topicName>
+                    <frameName>romi_frame</frameName>
+                </plugin>
             </sensor>
 
             <sensor type="gpu_ray" name="dist_sensor_p45">
@@ -168,8 +176,11 @@
                         <resolution>0.005</resolution>
                     </range>
                 </ray>
+                <plugin name="dist_p45" filename="libgazebo_ros_gpu_laser.so">
+                    <topicName>/romi/dist/p45</topicName>
+                    <frameName>romi_frame</frameName>
+                </plugin>
             </sensor>
-
 
         </link>
 

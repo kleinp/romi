@@ -90,7 +90,7 @@ public:
         1,
         boost::bind(&RomiPlugin::OnRosVelMsg, this, _1),
         ros::VoidPtr(), &this->rosQueue);
-    
+
     this->rosSub = this->rosNode->subscribe(so);
 
     // Spin up queue helper thread
