@@ -7,7 +7,13 @@ project(romi_description)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+    roscpp REQUIRED
+    std_msgs REQUIRED)
+
+find_package(gazebo REQUIRED)
+include_directories(${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -114,6 +120,9 @@ catkin_package(
 include_directories(
 # include
 # ${catkin_INCLUDE_DIRS}
+${roscpp_INCLUDE_DIRS}
+${std_msgs_INCLUDE_DIRS}
+${gazebo_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -145,6 +154,16 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+# Build romi plugin
+link_directories(${GAZEBO_LIBRARY_DIRS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+add_library(romi_plugin SHARED plugin/romi_plugin.cc)
+target_link_libraries(romi_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
+
+# Build the stand-alone velocity test program
+add_executable(vel plugin/vel.cc)
+target_link_libraries(vel ${GAZEBO_LIBRARIES})
 
 #############
 ## Install ##

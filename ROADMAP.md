@@ -85,3 +85,9 @@ Builds a map and uses it (along with odometry) to position itself in the 'world'
 
 ### romi_brain
 High level logic for what the robot does. Hopefully explorer the room to the most possible extent to build the best map.
+
+### navigation, path planning, obstacle avoidance
+
+[ROS navigation](http://wiki.ros.org/navigation/Tutorials/RobotSetup)
+
+The navigation stack takes odometry information and sensor information and sends out velocity commands to the robot. One can send 'goals' to the navigation stack for it to then compute a path given a cost function. Goals can be sent to the robot via rviz, or code.. The code option will be used by the romi_brain to explorer the room.

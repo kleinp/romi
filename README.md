@@ -27,11 +27,12 @@ ros-kinetic-gazebo8-plugins
 ```
 
 ## Setting up terminal
-In your ~/.bashrc file, add the following. Note the first line may already be present after installing ROS. Adjust the second line as necessary for the path to your workspace folder.
+In your ~/.bashrc file, add the following. Note the first line may already be present after installing ROS. Adjust the other lines as necessary for the path to your workspace folder.
 
 ```
 source /opt/ros/kinetic/setup.bash
 source /home/kleinp/romi/catkin_ws/devel/setup.bash
+source /home/kleinp/romi/catkin_ws/src/romi_gazebo/setup.bash
 ```
 
 After adding this, whenever you open a terminal it will be set up and read to go with both Gazebo and ROS!
