@@ -21,7 +21,7 @@
                 <pose>0 0 .04 0 0 1.5708</pose>
                 <geometry>
                     <mesh>
-                        <uri>model://romi/chassis.dae</uri>
+                        <uri>model://romi_description/meshes/chassis.dae</uri>
                     </mesh>
                 </geometry>
             </visual>
@@ -199,7 +199,7 @@
                 <pose>.0034 .069 .038 0 0 1.5708</pose>
                 <geometry>
                     <mesh>
-                        <uri>model://romi/wheel.dae</uri>
+                        <uri>model://romi_description/meshes/wheel.dae</uri>
                     </mesh>
                 </geometry>
             </visual>
@@ -233,7 +233,7 @@
                 <pose>.0034 -.069 .038 0 0 -1.5708</pose>
                 <geometry>
                     <mesh>
-                        <uri>model://romi/wheel.dae</uri>
+                        <uri>model://romi_description/meshes/wheel.dae</uri>
                     </mesh>
                 </geometry>
             </visual>
