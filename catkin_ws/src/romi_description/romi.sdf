@@ -128,7 +128,7 @@
                 </ray>
                 <plugin name="dist_0" filename="libgazebo_ros_gpu_laser.so">
                     <topicName>/romi/dist/fwd</topicName>
-                    <frameName>romi_frame</frameName>
+                    <frameName>frame_dist_fwd</frameName>
                 </plugin>
             </sensor>
 
@@ -153,7 +153,7 @@
                 </ray>
                 <plugin name="dist_n45" filename="libgazebo_ros_gpu_laser.so">
                     <topicName>/romi/dist/n45</topicName>
-                    <frameName>romi_frame</frameName>
+                    <frameName>frame_dist_n45</frameName>
                 </plugin>
             </sensor>
 
@@ -178,7 +178,7 @@
                 </ray>
                 <plugin name="dist_p45" filename="libgazebo_ros_gpu_laser.so">
                     <topicName>/romi/dist/p45</topicName>
-                    <frameName>romi_frame</frameName>
+                    <frameName>frame_dist_p45</frameName>
                 </plugin>
             </sensor>
 
