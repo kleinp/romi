@@ -9,7 +9,10 @@ project(romi_description)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
     roscpp REQUIRED
-    std_msgs REQUIRED)
+    std_msgs REQUIRED
+    tf REQUIRED
+    geometry_msgs REQUIRED
+    nav_msgs REQUIRED)
 
 find_package(gazebo REQUIRED)
 include_directories(${GAZEBO_INCLUDE_DIRS})

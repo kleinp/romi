@@ -13,6 +13,8 @@
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
 #include "std_msgs/Float32MultiArray.h"
+#include "tf/transform_broadcaster.h"
+#include "nav_msgs/Odometry.h"
 
 namespace gazebo
 {
@@ -26,11 +28,6 @@ public:
   /**
      * The load function is called by Gazebo when the plugin is
      * inserted into simulation
-     * 
-     * param[in] _model A pointer to the model that this plugin is
-     * attached to.
-     * param[in] _sdf A pointer to the plugin's SDF element.
-     * 
      */
 public:
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
@@ -53,21 +50,6 @@ public:
     this->model->GetJointController()->SetVelocityPID(this->right_wheel->GetScopedName(), this->right_pid);
     //std::cout << "Right wheel joint: " << this->right_wheel->GetScopedName() << "\n";
 
-    // Create node for gazebo API
-    this->node = transport::NodePtr(new transport::Node());
-#if GAZEBO_MAJOR_VERSION < 8
-    this->node->Init(this->model->GetWorld()->GetName());
-#else
-    this->node->Init(this->model->GetWorld()->Name());
-#endif
-
-    // Create topic names
-    std::string velTopicName = "~/" + this->model->GetName() + "/vel_cmd";
-    std::cout << "Velocity topic: " << velTopicName << "\n";
-
-    // Subscribe to velocity topic and register callback
-    this->sub = this->node->Subscribe(velTopicName, &RomiPlugin::OnVelMsg, this);
-
     // --- ROS integration ---
 
     // Initialize ROS
@@ -75,31 +57,45 @@ public:
     {
       int argc = 0;
       char **argv = NULL;
-      ros::init(argc, argv, "gazebo_client", ros::init_options::NoSigintHandler);
+      ros::init(argc, argv, "romi", ros::init_options::NoSigintHandler);
     }
 
     // create ROS node
-    this->rosNode.reset(new ros::NodeHandle("gazebo_client"));
+    this->rosNode.reset(new ros::NodeHandle("romi"));
+
+    // --- Velocity commands ----------------------------------------------------------------------------------
 
     // create named topic and subscribe to it
-    std::string rosVelTopicName = "/" + this->model->GetName() + "/vel_cmd";
-    std::cout << "ROS Velocity topic: " << rosVelTopicName << "\n";
+    std::string raw_vel_topic = "/" + this->model->GetName() + "/raw_vel_cmd";
+    std::cout << "Raw velocity topic: " << raw_vel_topic << "\n";
 
     ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Float32MultiArray>(
-        rosVelTopicName,
+        raw_vel_topic,
         1,
         boost::bind(&RomiPlugin::OnRosVelMsg, this, _1),
         ros::VoidPtr(), &this->rosQueue);
 
-    this->rosSub = this->rosNode->subscribe(so);
+    this->vel_sub = this->rosNode->subscribe(so);
 
-    // Spin up queue helper thread
+    // --- Odometry --------------------------------------------------------------------------------------------
+
+    // set up odometry publisher
+    this->odom_pub = this->rosNode->advertise<nav_msgs::Odometry>("odom", 50);
+
+    // --- Sensors ---------------------------------------------------------------------------------------------
+
+    // --- Finalize --------------------------------------------------------------------------------------------
+
+    // Start queue helper thread for topic subscriber
     this->rosQueueThread = std::thread(std::bind(&RomiPlugin::QueueThread, this));
+
+    // Start
+    this->gazeboUpdate = event::Events::ConnectWorldUpdateBegin(std::bind(&RomiPlugin::UpdateTask, this));
   }
 
   // Helper functions
 public:
-  void SetVelocity(const double &_left, const double &_right)
+  void SetRawVelocity(const double &_left, const double &_right)
   {
     std::cout << "Setting velocity: left=" << _left << " right=" << _right << "\n";
     this->model->GetJointController()->SetVelocityTarget(this->left_wheel->GetScopedName(), _left);
@@ -109,14 +105,49 @@ public:
 
   void OnRosVelMsg(const std_msgs::Float32MultiArrayConstPtr &_msg)
   {
-    std::cout << "Got a ROS message: " << _msg << "\n";
-    this->SetVelocity(_msg->data[0], _msg->data[1]);
+    this->SetRawVelocity(_msg->data[0], _msg->data[1]);
   }
 
 private:
-  void OnVelMsg(ConstVector3dPtr &_msg)
+  void UpdateTask()
   {
-    this->SetVelocity(_msg->x(), _msg->y());
+    ros::Time current_time = ros::Time::now();
+    // get model pose
+    ignition::math::Pose3d pose = this->model->RelativePose();
+    ignition::math::Vector3d vel = this->model->RelativeLinearVel();
+    ignition::math::Vector3d rot = this->model->RelativeAngularVel();
+
+    // Build and send out transform
+    geometry_msgs::TransformStamped odom_trans;
+    odom_trans.header.stamp = current_time;
+    odom_trans.header.frame_id = "map";
+    odom_trans.child_frame_id = "base_link";
+
+    odom_trans.transform.translation.x = pose.Pos().X();
+    odom_trans.transform.translation.y = pose.Pos().Y();
+    odom_trans.transform.translation.z = pose.Pos().Z();
+    odom_trans.transform.rotation = quaternionIgnition2geometryMsg(pose.Rot());
+
+    odom_broadcaster.sendTransform(odom_trans);
+
+    // Build and send out odometry
+    nav_msgs::Odometry odom;
+    odom.header.stamp = current_time;
+    odom.header.frame_id = "map";
+    odom.child_frame_id = "base_link";
+
+    odom.pose.pose.position.x = odom_trans.transform.translation.x;
+    odom.pose.pose.position.y = odom_trans.transform.translation.y;
+    odom.pose.pose.position.z = odom_trans.transform.translation.z;
+    odom.pose.pose.orientation = odom_trans.transform.rotation;
+
+    odom.twist.twist.linear.x = vel.X();
+    odom.twist.twist.linear.y = vel.Y();
+    odom.twist.twist.angular.z = rot.Z();
+
+    odom_pub.publish(odom);
+
+    //std::cout << "Pose (x, y, z): (" << pose.Pos().X() << ", " << pose.Pos().Y() << ", " << pose.Pos().Z() << ")\n";
   }
 
   void QueueThread()
@@ -135,14 +166,26 @@ private:
   common::PID left_pid;
   physics::JointPtr right_wheel;
   common::PID right_pid;
-  transport::NodePtr node;
-  transport::SubscriberPtr sub;
 
   // ROS private variables
   std::unique_ptr<ros::NodeHandle> rosNode;
-  ros::Subscriber rosSub;
+  ros::Subscriber vel_sub;
   ros::CallbackQueue rosQueue;
   std::thread rosQueueThread;
+  event::ConnectionPtr gazeboUpdate;
+  ros::Publisher odom_pub;
+  tf::TransformBroadcaster odom_broadcaster;
+
+  geometry_msgs::Quaternion quaternionIgnition2geometryMsg(ignition::math::Quaterniond q)
+  {
+    geometry_msgs::Quaternion gq;
+    gq.x = q.X();
+    gq.y = q.Y();
+    gq.z = q.Z();
+    gq.w = q.W();
+
+    return(gq);
+  }
 };
 
 // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.

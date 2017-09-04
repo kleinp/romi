@@ -5,6 +5,7 @@
         "*.config": "xml",
         "string": "cpp",
         "cstddef": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "thread": "cpp"
     }
 }
